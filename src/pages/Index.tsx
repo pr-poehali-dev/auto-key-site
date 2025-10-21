@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 
 const Index = () => {
@@ -13,16 +14,56 @@ const Index = () => {
     message: ''
   });
 
-  const carBrands = [
-    { name: 'Toyota', models: 'Camry, Corolla, RAV4', price: 'от 3500₽', icon: 'Car' },
-    { name: 'Mercedes-Benz', models: 'E-Class, C-Class, GLC', price: 'от 5500₽', icon: 'Car' },
-    { name: 'BMW', models: '3 Series, 5 Series, X5', price: 'от 5500₽', icon: 'Car' },
-    { name: 'Volkswagen', models: 'Polo, Tiguan, Passat', price: 'от 3000₽', icon: 'Car' },
-    { name: 'Hyundai', models: 'Solaris, Creta, Tucson', price: 'от 2800₽', icon: 'Car' },
-    { name: 'Kia', models: 'Rio, Sportage, Optima', price: 'от 2800₽', icon: 'Car' },
-    { name: 'Audi', models: 'A4, A6, Q5', price: 'от 6000₽', icon: 'Car' },
-    { name: 'Ford', models: 'Focus, Mondeo, Kuga', price: 'от 3200₽', icon: 'Car' }
-  ];
+  const [selectedBrand, setSelectedBrand] = useState<string>('');
+  const [selectedModel, setSelectedModel] = useState<string>('');
+  const [selectedYear, setSelectedYear] = useState<string>('');
+
+  const carDatabase = {
+    'Toyota': {
+      models: ['Camry', 'Corolla', 'RAV4', 'Land Cruiser', 'Highlander'],
+      price: 'от 3500₽'
+    },
+    'Mercedes-Benz': {
+      models: ['E-Class', 'C-Class', 'GLC', 'S-Class', 'GLE'],
+      price: 'от 5500₽'
+    },
+    'BMW': {
+      models: ['3 Series', '5 Series', 'X5', 'X3', '7 Series'],
+      price: 'от 5500₽'
+    },
+    'Volkswagen': {
+      models: ['Polo', 'Tiguan', 'Passat', 'Golf', 'Touareg'],
+      price: 'от 3000₽'
+    },
+    'Hyundai': {
+      models: ['Solaris', 'Creta', 'Tucson', 'Santa Fe', 'Elantra'],
+      price: 'от 2800₽'
+    },
+    'Kia': {
+      models: ['Rio', 'Sportage', 'Optima', 'Sorento', 'Seltos'],
+      price: 'от 2800₽'
+    },
+    'Audi': {
+      models: ['A4', 'A6', 'Q5', 'Q7', 'A3'],
+      price: 'от 6000₽'
+    },
+    'Ford': {
+      models: ['Focus', 'Mondeo', 'Kuga', 'Explorer', 'Fiesta'],
+      price: 'от 3200₽'
+    }
+  };
+
+  const years = Array.from({ length: 25 }, (_, i) => (2024 - i).toString());
+
+  const getAvailableModels = () => {
+    if (!selectedBrand) return [];
+    return carDatabase[selectedBrand as keyof typeof carDatabase]?.models || [];
+  };
+
+  const getCurrentPrice = () => {
+    if (!selectedBrand) return '';
+    return carDatabase[selectedBrand as keyof typeof carDatabase]?.price || '';
+  };
 
   const services = [
     {
@@ -137,23 +178,159 @@ const Index = () => {
           <div className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">Каталог автоключей</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Изготовление ключей для всех популярных марок автомобилей
+              Выберите марку, модель и год выпуска автомобиля для расчета стоимости
             </p>
           </div>
+
+          <Card className="max-w-4xl mx-auto mb-12 shadow-lg">
+            <CardHeader className="bg-gradient-to-br from-primary/5 to-accent/5">
+              <CardTitle className="font-heading text-2xl flex items-center gap-2">
+                <Icon name="Search" className="h-6 w-6 text-accent" />
+                Подбор ключа для вашего автомобиля
+              </CardTitle>
+              <CardDescription>
+                Заполните параметры для точного расчета стоимости изготовления ключа
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Icon name="Building2" className="h-4 w-4 text-accent" />
+                    Марка автомобиля
+                  </label>
+                  <Select value={selectedBrand} onValueChange={(value) => {
+                    setSelectedBrand(value);
+                    setSelectedModel('');
+                  }}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Выберите марку" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.keys(carDatabase).map((brand) => (
+                        <SelectItem key={brand} value={brand}>
+                          {brand}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Icon name="Car" className="h-4 w-4 text-accent" />
+                    Модель
+                  </label>
+                  <Select 
+                    value={selectedModel} 
+                    onValueChange={setSelectedModel}
+                    disabled={!selectedBrand}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Выберите модель" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getAvailableModels().map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Icon name="Calendar" className="h-4 w-4 text-accent" />
+                    Год выпуска
+                  </label>
+                  <Select 
+                    value={selectedYear} 
+                    onValueChange={setSelectedYear}
+                    disabled={!selectedModel}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Выберите год" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {selectedBrand && selectedModel && selectedYear && (
+                <div className="bg-gradient-to-br from-accent/10 to-accent/5 border-2 border-accent/20 rounded-lg p-6 animate-fade-in">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-heading text-xl font-semibold mb-1">
+                        {selectedBrand} {selectedModel} ({selectedYear})
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Изготовление и программирование автоключа
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-3xl font-heading font-bold text-accent">
+                        {getCurrentPrice()}
+                      </div>
+                      <p className="text-xs text-muted-foreground">стоимость работы</p>
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-4 mb-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Icon name="Clock" className="h-4 w-4 text-accent" />
+                      <span>Изготовление 30-60 мин</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Icon name="ShieldCheck" className="h-4 w-4 text-accent" />
+                      <span>Гарантия 12 месяцев</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Icon name="Truck" className="h-4 w-4 text-accent" />
+                      <span>Выезд на место</span>
+                    </div>
+                  </div>
+                  <Button className="w-full bg-accent hover:bg-accent/90" size="lg">
+                    <Icon name="Phone" className="mr-2 h-5 w-5" />
+                    Заказать изготовление ключа
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="text-center mb-8">
+            <h3 className="font-heading text-2xl font-bold mb-4">Популярные марки</h3>
+          </div>
+          
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {carBrands.map((brand, idx) => (
-              <Card key={idx} className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer group">
+            {Object.entries(carDatabase).map(([brand, data]) => (
+              <Card 
+                key={brand} 
+                className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer group"
+                onClick={() => {
+                  setSelectedBrand(brand);
+                  setSelectedModel('');
+                  setSelectedYear('');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
-                    <Icon name={brand.icon} className="h-8 w-8 text-accent group-hover:scale-110 transition-transform" />
-                    <Badge variant="secondary">{brand.price}</Badge>
+                    <Icon name="Car" className="h-8 w-8 text-accent group-hover:scale-110 transition-transform" />
+                    <Badge variant="secondary">{data.price}</Badge>
                   </div>
-                  <CardTitle className="font-heading">{brand.name}</CardTitle>
-                  <CardDescription>{brand.models}</CardDescription>
+                  <CardTitle className="font-heading">{brand}</CardTitle>
+                  <CardDescription>{data.models.slice(0, 3).join(', ')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button variant="outline" className="w-full group-hover:bg-accent group-hover:text-white group-hover:border-accent transition-colors">
-                    Заказать ключ
+                    Выбрать марку
                   </Button>
                 </CardContent>
               </Card>
